@@ -18,8 +18,8 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void create(Game game) throws InccorrectWidthOrHeight, IncorrectNumberOfMines {
-//        final String gameId = String.valueOf(java.time.LocalDateTime.now());
-        final String gameId = "gameId";
+        final String gameId = String.valueOf(java.time.LocalDateTime.now());
+//        final String gameId = "gameId";
         game.setGameId(gameId);
 
         int h = game.getHeight();
