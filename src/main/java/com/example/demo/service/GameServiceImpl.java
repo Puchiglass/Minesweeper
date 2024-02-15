@@ -16,6 +16,31 @@ public class GameServiceImpl implements GameService {
     private static final Pattern PATTERN_BOUND = Pattern.compile("[1-8]");
     private static final Map<String, Game> GAME_MAP = new HashMap<>();
 
+    private static class Point {
+        int x;
+        int y;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Point point = (Point) o;
+            return x == point.x && y == point.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+    }
+
+    private List<Point> listOfFreePlace = new LinkedList<>();
+
     @Override
     public void create(Game game) throws InccorrectWidthOrHeight, IncorrectNumberOfMines {
         final String gameId = String.valueOf(java.time.LocalDateTime.now());
@@ -90,16 +115,21 @@ public class GameServiceImpl implements GameService {
         int xMax = game.getHeight();
         int yMax = game.getWidth();
         int minesCount = game.getMinesCount();
-        // Потенциально узкое место из-за рандомного поиска места для мины
+
         Random random = new Random();
-        while (minesCount > 0) {
-            int xBomb = random.nextInt(yMax);
-            int yBomb = random.nextInt(xMax);
-            if (bombField[xBomb][yBomb].equals("B") || xBomb == x && yBomb == y)
-                continue;
-            bombField[xBomb][yBomb] = "B";
-            minesCount--;
+        for (int i = 0; i < game.getHeight(); i++) {
+            for (int j = 0; j < game.getWidth(); j++) {
+                if (i == x && j == y)
+                    continue;
+                listOfFreePlace.add(new Point(i, j));
+            }
         }
+        for (int i = 0; i < minesCount; i++) {
+            int ind = random.nextInt(listOfFreePlace.size());
+            Point p = listOfFreePlace.remove(ind);
+            bombField[p.y][p.y] = "B";
+        }
+
         boolean[][] touched = new boolean[game.getHeight()][game.getWidth()];
         for (int i = 0; i < xMax; i++) {
             for (int j = 0; j < yMax; j++) {
